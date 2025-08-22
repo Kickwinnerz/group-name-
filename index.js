@@ -1,64 +1,68 @@
-const login = require("ws3-fca");
-const fs = require("fs");
-const express = require("express");
-
-// ✅ Load AppState
-let appState;
-try {
-  appState = JSON.parse(fs.readFileSync("appstate.json", "utf-8"));
-} catch (err) {
-  console.error("❌ Error reading appstate.json:", err);
-  process.exit(1);
-}
-
-// ✅ Group Info
-const GROUP_THREAD_ID = "1232627273718842";
-const LOCKED_GROUP_NAME = "TMKL GUSTI KA BACHA ";
-
-// ✅ Express Server to keep bot alive (for Render or UptimeRobot)
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 3000;
-app.get("/", (req, res) => res.send("🔐 Group Name Locker Bot is alive!"));
-app.listen(PORT, () => console.log(`🌐 Web server running on port ${PORT}`));
 
-// ✅ Function to start locking loop
-function startGroupNameLocker(api) {
-  const lockLoop = () => {
-    api.getThreadInfo(GROUP_THREAD_ID, (err, info) => {
-      if (err) {
-        console.error("❌ Error fetching group info:", err);
-      } else {
-        if (info.name !== LOCKED_GROUP_NAME) {
-          console.warn(`⚠️ Group name changed to "${info.name}" → resetting in 10s...`);
-          setTimeout(() => {
-            api.setTitle(LOCKED_GROUP_NAME_ DEVI_ONFIRE, GROUP_THREAD_ID, (err) => {
-              if (err) {
-                console.error("❌ Failed to reset group name:", err);
-              } else {
-                console.log("🔒 Group name reset successfully.");
-              }
-            });
-          }, 10000); // 10 sec delay before reset
-        } else {
-          console.log("✅ Group name is correct.");
-        }
-      }
+app.use(express.json());
 
-      // 🔁 Schedule next check after 5 seconds
-      setTimeout(lockLoop, 1000);
-    });
-  };
-
-  lockLoop(); // Start loop
-}
-
-// 🟢 Facebook Login
-login({ appState }, (err, api) => {
-  if (err) {
-    console.error("❌ Login Failed:", err);
-    return;
-  }
-
-  console.log("✅ Logged in successfully. Group name locker activated.");
-  startGroupNameLocker(api);
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Facebook Group Management API is running on Vercel',
+    status: 'Active',
+    timestamp: new Date().toISOString(),
+    endpoints: [
+      '/api/status',
+      '/api/info',
+      '/api/health',
+      '/api/group'
+    ]
+  });
 });
+
+// Status endpoint
+app.get('/api/status', (req, res) => {
+  res.json({ 
+    status: 'OK',
+    server: 'Vercel Node.js',
+    time: new Date().toISOString()
+  });
+});
+
+// Info endpoint
+app.get('/api/info', (req, res) => {
+  res.json({ 
+    app: 'FB Group Manager',
+    version: '1.0.0',
+    deployedOn: 'Vercel',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    healthy: true,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Group management endpoint (example)
+app.get('/api/group', (req, res) => {
+  res.json({ 
+    message: 'Group management endpoint',
+    note: 'This is a placeholder for group management functionality',
+    instructions: 'For actual Facebook automation, use a dedicated server'
+  });
+});
+
+// Handle all other routes
+app.all('*', (req, res) => {
+  res.status(404).json({ 
+    error: 'Endpoint not found',
+    message: 'Requested API endpoint does not exist',
+    path: req.path
+  });
+});
+
+// Export the Express app as a serverless function
+module.exports = app;

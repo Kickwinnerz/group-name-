@@ -1,16 +1,16 @@
 {
   "name": "fb-group-locker-devi",
   "version": "1.0.0",
-  "description": "Facebook group name locker bot using ws3-fca",
-  "main": "index.js",
+  "description": "Facebook group management API",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node index.js",
-    "build": "echo 'Build successful'"
+    "start": "node api/index.js",
+    "build": "echo 'Build successful'",
+    "dev": "node api/index.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "ws3-fca": "^1.0.0",
-    "npmlog": "^6.0.2"
+    "axios": "^1.6.0"
   },
   "engines": {
     "node": ">=18.x"
